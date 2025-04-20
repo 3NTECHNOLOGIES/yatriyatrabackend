@@ -1,11 +1,12 @@
-import { Document, Model } from "mongoose";
+import { Document, Model } from 'mongoose';
 
 export interface IUser {
   name: string;
   email: string;
   password: string;
-  role: "user" | "admin";
+  role: 'user' | 'admin';
   isEmailVerified: boolean;
+  status: 'active' | 'inactive';
 }
 
 export interface IUserDocument extends IUser, Document {
@@ -17,7 +18,7 @@ export interface IUserModel extends Model<IUserDocument> {
 }
 
 export interface IUserWithTokens {
-  user: Omit<IUser, "password">;
+  user: Omit<IUser, 'password'>;
   tokens: {
     access: {
       token: string;
