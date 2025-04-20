@@ -1,7 +1,7 @@
 {
-  "name": "node-express-boilerplate",
+  "name": "yatriyatra-backend",
   "version": "1.0.0",
-  "description": "Scalable Express.js application with TypeScript",
+  "description": "Yatriyatra Backend",
   "main": "dist/index.js",
   "scripts": {
     "start": "node dist/index.js",
