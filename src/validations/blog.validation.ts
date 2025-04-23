@@ -46,6 +46,7 @@ export const paginationSchema = z.object({
     .optional()
     .transform(val => (val ? parseInt(val, 10) : undefined)),
   sortBy: z.string().optional(),
+  orderBy: z.string().optional(),
   search: z.string().optional(),
   categoryId: z.string().optional(),
   createdAtFrom: z

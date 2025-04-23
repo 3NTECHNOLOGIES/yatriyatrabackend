@@ -19,9 +19,9 @@ interface AuthenticatedUser {
   role: string;
 }
 
-interface AuthRequest extends Request {
+type AuthRequest = Request & {
   user?: AuthenticatedUser;
-}
+};
 
 export const createBlogHandler = async (req: AuthRequest, res: Response) => {
   try {
@@ -95,6 +95,7 @@ export const getBlogsHandler = async (req: Request, res: Response) => {
       page,
       limit,
       sortBy,
+      orderBy,
       search,
       categoryId,
       createdAtFrom,
@@ -107,6 +108,7 @@ export const getBlogsHandler = async (req: Request, res: Response) => {
       page: page ? parseInt(page as string, 10) : undefined,
       limit: limit ? parseInt(limit as string, 10) : undefined,
       sortBy: sortBy as string,
+      orderBy: orderBy as string,
       search: search as string,
       categoryId: categoryId as string,
       createdAtFrom: createdAtFrom ? new Date(createdAtFrom as string) : undefined,

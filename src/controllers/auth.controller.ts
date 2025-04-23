@@ -49,7 +49,26 @@ export const refreshToken = async (req: Request, res: Response) => {
 
 export const logoutUser = async (req: Request, res: Response) => {
   try {
-    await logout(req.body.refreshToken);
+    let refreshToken = req.body.refreshToken;
+
+    // If no refreshToken in body, check authorization header
+    if (!refreshToken && req.headers.authorization) {
+      const authHeader = req.headers.authorization;
+      if (authHeader.startsWith('Bearer ')) {
+        refreshToken = authHeader.substring(7);
+      }
+    }
+
+    // If still no refreshToken, check cookies
+    if (!refreshToken && req.cookies && req.cookies.refreshToken) {
+      refreshToken = req.cookies.refreshToken;
+    }
+
+    if (!refreshToken) {
+      return sendResponse(res, httpStatus.BAD_REQUEST, 'Refresh token is required');
+    }
+
+    await logout(refreshToken);
     sendResponse(res, httpStatus.OK, 'Logout successful');
   } catch (error) {
     if (error instanceof Error) {

@@ -90,9 +90,21 @@ router.post('/login', validate(loginSchema), login);
  *     tags: [Auth]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: The refresh token (optional - can also be provided via Authorization header or cookies)
  *     responses:
  *       200:
  *         description: Successfully logged out
+ *       400:
+ *         description: Refresh token is required
  *       401:
  *         description: Please authenticate
  */
