@@ -70,6 +70,28 @@ const options: swaggerJsdoc.Options = {
             },
           },
         },
+        FileUploadResponse: {
+          type: 'object',
+          properties: {
+            success: {
+              type: 'boolean',
+            },
+            message: {
+              type: 'string',
+            },
+            data: {
+              type: 'object',
+              properties: {
+                fileUrl: {
+                  type: 'string',
+                },
+                key: {
+                  type: 'string',
+                },
+              },
+            },
+          },
+        },
         AuthResponse: {
           type: 'object',
           properties: {

@@ -4,6 +4,8 @@ import homeRoute from './home.route';
 import categoryRoute from './category.route';
 import blogRoute from './blog.route';
 import userRoute from './user.route';
+import uploadRoute from './upload.route';
+import imageRoute from './image.route';
 import auth from '../../middlewares/auth';
 
 const router = express.Router();
@@ -33,6 +35,14 @@ const defaultRoutes: IRoute[] = [
   {
     path: '/users',
     route: userRoute,
+  },
+  {
+    path: '',
+    route: uploadRoute,
+  },
+  {
+    path: '/images',
+    route: imageRoute,
   },
 ];
 
