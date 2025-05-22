@@ -52,6 +52,8 @@ export default {
     refreshExpirationDays: envVars.JWT_REFRESH_EXPIRATION_DAYS,
   },
   cors: {
-    origin: envVars.CORS_ORIGIN,
+    origin: envVars.CORS_ORIGIN
+      ? envVars.CORS_ORIGIN.split(',')
+      : ['http://localhost:5173', 'http://localhost:8080', 'http://localhost:3000'],
   },
 };

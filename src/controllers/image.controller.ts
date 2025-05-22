@@ -30,9 +30,11 @@ export const getImage = catchAsync(async (req: Request, res: Response) => {
     // Get the object and check if it exists
     const headObject = await s3.headObject(params).promise();
 
-    // Set the content type based on the S3 object
-    res.set('Content-Type', headObject.ContentType);
-    res.set('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+    // Set content type and cache headers
+    res.set({
+      'Content-Type': headObject.ContentType,
+      'Cache-Control': 'public, max-age=31536000',
+    });
 
     // Stream the image directly to the response
     const stream = s3.getObject(params).createReadStream();

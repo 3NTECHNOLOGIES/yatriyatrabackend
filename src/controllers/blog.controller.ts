@@ -15,7 +15,7 @@ import { sendResponse } from '../utils/response';
 
 // Extend the Request type to include authenticated user information
 interface AuthenticatedUser {
-  id: string;
+  id?: string;
   role: string;
 }
 

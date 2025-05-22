@@ -1,5 +1,6 @@
 import express from 'express';
 import { getImage } from '../../controllers/image.controller';
+import { imageCors } from '../../middlewares/imageCors';
 
 const router = express.Router();
 
@@ -68,7 +69,7 @@ const router = express.Router();
  *                   type: string
  *                   example: Internal server error
  */
-// Use a simple route with query parameter
-router.get('/', getImage);
+// Use a simple route with query parameter and apply CORS middleware
+router.get('/', imageCors, getImage);
 
 export default router;

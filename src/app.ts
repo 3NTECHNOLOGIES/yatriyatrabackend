@@ -19,14 +19,43 @@ import docsRoute from './routes/docs.route';
 // Create Express app
 const app = express();
 
-// Set security HTTP headers
-app.use(helmet());
-
-// Enable CORS
+// Set up CORS
 app.use(
   cors({
-    origin: config.cors.origin,
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      if (
+        config.env === 'development' ||
+        (Array.isArray(config.cors.origin) && config.cors.origin.indexOf(origin) !== -1)
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  }),
+);
+
+// Configure Helmet with cross-origin resource policy
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: false,
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:', 'blob:', 'http://localhost:5173', 'http://localhost:8080'],
+        connectSrc: ["'self'", 'http://localhost:5173', 'http://localhost:8080'],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+      },
+    },
   }),
 );
 
