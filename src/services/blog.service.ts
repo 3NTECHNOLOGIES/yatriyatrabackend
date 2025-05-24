@@ -110,6 +110,8 @@ export const getBlogs = async (options: {
     date: Date;
     status: string;
     views: number;
+    coverImage: string;
+    featured: boolean;
   }>;
   page: number;
   limit: number;
@@ -220,6 +222,8 @@ export const getBlogs = async (options: {
       date: blog.createdAt,
       status: blog.status,
       views: blog.views,
+      coverImage: blog.coverImage || '',
+      featured: blog.featured || false,
     };
   });
 

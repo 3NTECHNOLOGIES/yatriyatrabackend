@@ -5,8 +5,15 @@ export const createBlogSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title is too long'),
   category: z.string().min(1, 'Category ID is required'),
   content: z.string().min(1, 'Content is required'),
-  featured: z.boolean().optional(),
-  status: z.nativeEnum(BlogStatus).default(BlogStatus.DRAFT).optional(),
+  featured: z.preprocess(
+    val => (val === 'true' ? true : val === 'false' ? false : val),
+    z.boolean().optional(),
+  ),
+  status: z.preprocess(
+    val => (typeof val === 'string' ? val : undefined),
+    z.nativeEnum(BlogStatus).default(BlogStatus.DRAFT).optional(),
+  ),
+  coverImage: z.any().optional(),
 });
 
 export const updateBlogSchema = z
@@ -14,8 +21,15 @@ export const updateBlogSchema = z
     title: z.string().min(1, 'Title is required').max(200, 'Title is too long').optional(),
     category: z.string().min(1, 'Category ID is required').optional(),
     content: z.string().min(1, 'Content is required').optional(),
-    featured: z.boolean().optional(),
-    status: z.nativeEnum(BlogStatus).optional(),
+    featured: z.preprocess(
+      val => (val === 'true' ? true : val === 'false' ? false : val),
+      z.boolean().optional(),
+    ),
+    status: z.preprocess(
+      val => (typeof val === 'string' ? val : undefined),
+      z.nativeEnum(BlogStatus).optional(),
+    ),
+    coverImage: z.any().optional(),
   })
   .refine(data => Object.keys(data).length > 0, {
     message: 'At least one field must be provided for update',
@@ -29,7 +43,11 @@ export const saveDraftSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title is too long'),
   category: z.string().min(1, 'Category ID is required'),
   content: z.string().min(1, 'Content is required'),
-  featured: z.boolean().optional(),
+  featured: z.preprocess(
+    val => (val === 'true' ? true : val === 'false' ? false : val),
+    z.boolean().optional(),
+  ),
+  coverImage: z.any().optional(),
 });
 
 export const blogIdSchema = z.object({

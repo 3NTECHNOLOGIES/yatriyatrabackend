@@ -15,6 +15,7 @@ export interface IBlog {
   author: Schema.Types.ObjectId;
   status: BlogStatus;
   views: number;
+  coverImage?: string;
 }
 
 export interface IBlogDocument extends IBlog, Document {

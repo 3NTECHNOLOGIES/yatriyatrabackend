@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Express } from 'express';
 import helmet from 'helmet';
 import compression from 'compression';
 import cors from 'cors';
@@ -79,6 +79,19 @@ if (config.env === 'development') {
 // JWT authentication
 app.use(passport.initialize());
 passport.use('jwt', jwtStrategy);
+
+// Debug middleware for logging requests
+app.use((req, res, next) => {
+  logger.debug(`${req.method} ${req.originalUrl}`);
+  logger.debug('Content-Type:', req.headers['content-type']);
+  if (req.originalUrl.includes('/blogs') && req.method === 'POST') {
+    logger.debug('Blog Request Body:', JSON.stringify(req.body, null, 2));
+    if ('file' in req && req.file) {
+      logger.debug('File:', req.file.originalname);
+    }
+  }
+  next();
+});
 
 // Swagger documentation route
 app.use('/api-docs', docsRoute);

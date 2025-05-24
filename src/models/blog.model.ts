@@ -35,6 +35,10 @@ const blogSchema = new mongoose.Schema<IBlogDocument, IBlogModel>(
       type: Number,
       default: 0,
     },
+    coverImage: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,

@@ -18,6 +18,7 @@ import {
   saveDraftSchema,
 } from '../../validations/blog.validation';
 import auth from '../../middlewares/auth';
+import upload from '../../middlewares/upload';
 
 const router = Router();
 
@@ -221,7 +222,19 @@ const router = Router();
  */
 router
   .route('/')
-  .post(auth('admin'), validate(createBlogSchema), createBlogHandler)
+  .post(
+    auth('admin'),
+    upload.single('coverImage'),
+    (req, res, next) => {
+      // After file upload, move coverImage data from file to body for validation
+      if (req.file) {
+        req.body.coverImage = req.file.path || 'file-uploaded';
+      }
+      next();
+    },
+    validate(createBlogSchema),
+    createBlogHandler,
+  )
   .get(validate(paginationSchema, 'query'), getBlogsHandler);
 
 /**
@@ -267,7 +280,19 @@ router
  *       403:
  *         description: Forbidden - User does not have admin privileges
  */
-router.route('/draft').post(auth('admin'), validate(saveDraftSchema), saveBlogAsDraftHandler);
+router.route('/draft').post(
+  auth('admin'),
+  upload.single('coverImage'),
+  (req, res, next) => {
+    // After file upload, move coverImage data from file to body for validation
+    if (req.file) {
+      req.body.coverImage = req.file.path || 'file-uploaded';
+    }
+    next();
+  },
+  validate(saveDraftSchema),
+  saveBlogAsDraftHandler,
+);
 
 /**
  * @swagger
@@ -398,6 +423,14 @@ router
   .put(
     auth('admin'),
     validate(blogIdSchema, 'params'),
+    upload.single('coverImage'),
+    (req, res, next) => {
+      // After file upload, move coverImage data from file to body for validation
+      if (req.file) {
+        req.body.coverImage = req.file.path || 'file-uploaded';
+      }
+      next();
+    },
     validate(updateBlogSchema),
     updateBlogHandler,
   )

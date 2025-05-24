@@ -12,6 +12,8 @@ import {
   incrementBlogViews,
 } from '../services/blog.service';
 import { sendResponse } from '../utils/response';
+import { uploadToS3 } from '../services/upload.service';
+import logger from '../config/logger';
 
 // Extend the Request type to include authenticated user information
 interface AuthenticatedUser {
@@ -23,7 +25,12 @@ type AuthRequest = Request & {
   user?: AuthenticatedUser;
 };
 
-export const createBlogHandler = async (req: AuthRequest, res: Response) => {
+// Extend Request to include file from multer
+interface AuthRequestWithFile extends AuthRequest {
+  file?: Express.Multer.File;
+}
+
+export const createBlogHandler = async (req: AuthRequestWithFile, res: Response) => {
   try {
     // Set author as the authenticated user
     if (!req.user?.id) {
@@ -31,23 +38,51 @@ export const createBlogHandler = async (req: AuthRequest, res: Response) => {
       return;
     }
 
+    // Log request body and file for debugging
+    logger.info('Blog creation request body:', JSON.stringify(req.body));
+    logger.info('Blog creation request file:', req.file ? 'File present' : 'No file');
+
     const blogData = {
       ...req.body,
       author: new mongoose.Types.ObjectId(req.user.id),
     };
+
+    // Handle cover image upload if provided
+    if (req.file) {
+      try {
+        const fileToUpload = {
+          fieldname: req.file.fieldname,
+          originalname: req.file.originalname,
+          encoding: req.file.encoding,
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+          buffer: req.file.buffer,
+        };
+
+        // Upload to S3 with 'blog-covers' folder
+        const uploadResult = await uploadToS3(fileToUpload, { folderName: 'blog-covers' });
+        blogData.coverImage = uploadResult.fileUrl;
+      } catch (uploadError) {
+        logger.error('Cover image upload error:', uploadError);
+        sendResponse(res, httpStatus.BAD_REQUEST, 'Failed to upload cover image');
+        return;
+      }
+    }
 
     const blog = await createBlog(blogData);
     sendResponse(res, httpStatus.CREATED, 'Blog created successfully', { blog });
   } catch (error) {
     if (error instanceof Error) {
+      logger.error('Blog creation error:', error.message);
       sendResponse(res, httpStatus.BAD_REQUEST, error.message);
     } else {
+      logger.error('Unknown blog creation error:', error);
       sendResponse(res, httpStatus.INTERNAL_SERVER_ERROR, 'Something went wrong');
     }
   }
 };
 
-export const saveBlogAsDraftHandler = async (req: AuthRequest, res: Response) => {
+export const saveBlogAsDraftHandler = async (req: AuthRequestWithFile, res: Response) => {
   try {
     // Set author as the authenticated user
     if (!req.user?.id) {
@@ -59,6 +94,27 @@ export const saveBlogAsDraftHandler = async (req: AuthRequest, res: Response) =>
       ...req.body,
       author: new mongoose.Types.ObjectId(req.user.id),
     };
+
+    // Handle cover image upload if provided
+    if (req.file) {
+      try {
+        const fileToUpload = {
+          fieldname: req.file.fieldname,
+          originalname: req.file.originalname,
+          encoding: req.file.encoding,
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+          buffer: req.file.buffer,
+        };
+
+        // Upload to S3 with 'blog-covers' folder
+        const uploadResult = await uploadToS3(fileToUpload, { folderName: 'blog-covers' });
+        blogData.coverImage = uploadResult.fileUrl;
+      } catch (uploadError) {
+        sendResponse(res, httpStatus.BAD_REQUEST, 'Failed to upload cover image');
+        return;
+      }
+    }
 
     const blog = await saveBlogAsDraft(blogData);
     sendResponse(res, httpStatus.CREATED, 'Blog saved as draft successfully', { blog });
@@ -146,10 +202,33 @@ export const getBlogHandler = async (req: Request, res: Response) => {
   }
 };
 
-export const updateBlogHandler = async (req: AuthRequest, res: Response) => {
+export const updateBlogHandler = async (req: AuthRequestWithFile, res: Response) => {
   try {
     // Admin can update any blog, but ensure we don't change the author
-    const blog = await updateBlogById(req.params.blogId, req.body);
+    const updateData = { ...req.body };
+
+    // Handle cover image upload if provided
+    if (req.file) {
+      try {
+        const fileToUpload = {
+          fieldname: req.file.fieldname,
+          originalname: req.file.originalname,
+          encoding: req.file.encoding,
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+          buffer: req.file.buffer,
+        };
+
+        // Upload to S3 with 'blog-covers' folder
+        const uploadResult = await uploadToS3(fileToUpload, { folderName: 'blog-covers' });
+        updateData.coverImage = uploadResult.fileUrl;
+      } catch (uploadError) {
+        sendResponse(res, httpStatus.BAD_REQUEST, 'Failed to upload cover image');
+        return;
+      }
+    }
+
+    const blog = await updateBlogById(req.params.blogId, updateData);
     sendResponse(res, httpStatus.OK, 'Blog updated successfully', { blog });
   } catch (error) {
     if (error instanceof Error) {
