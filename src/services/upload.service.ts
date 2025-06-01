@@ -1,4 +1,4 @@
-import { s3, s3Config } from '../config/s3';
+import { getS3Instance, s3Config } from '../config/s3';
 import { IUploadedFile, IUploadOptions } from '../interfaces/upload.interface';
 import config from '../config/config';
 
@@ -31,7 +31,8 @@ export const uploadToS3 = async (
     ContentType: file.mimetype,
   };
 
-  // Upload the file to S3
+  // Get S3 instance and upload the file
+  const s3 = getS3Instance();
   await s3.upload(params).promise();
 
   // Use baseUrl from config that can be set via environment variables

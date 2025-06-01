@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
-import { s3, s3Config } from '../config/s3';
+import { getS3Instance, s3Config } from '../config/s3';
 import catchAsync from '../utils/catchAsync';
 
 /**
@@ -21,6 +21,9 @@ export const getImage = catchAsync(async (req: Request, res: Response) => {
   }
 
   try {
+    // Get S3 instance
+    const s3 = getS3Instance();
+
     // Get the image from S3
     const params = {
       Bucket: s3Config.bucket || 'yatriyatra-uploads',
