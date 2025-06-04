@@ -76,6 +76,18 @@ if (config.env === 'development') {
   app.use(morgan('dev'));
 }
 
+// Sanitize request data - MOVED BEFORE ROUTES
+app.use(mongoSanitize());
+
+// Rate limiting for API routes - MOVED BEFORE ROUTES
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api', limiter);
+
 // JWT authentication
 app.use(passport.initialize());
 passport.use('jwt', jwtStrategy);
@@ -96,25 +108,13 @@ app.use((req, res, next) => {
 // Swagger documentation route
 app.use('/api-docs', docsRoute);
 
-// API v1 routes (before sanitization and rate limiting)
-app.use('/api/v1', routes);
-
-// Rate limiting for API routes
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use('/api', limiter);
-
-// Sanitize request data
-app.use('/api', mongoSanitize());
-
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(httpStatus.OK).send({ status: 'ok' });
 });
+
+// API v1 routes
+app.use('/api/v1', routes);
 
 // Send 404 error for unknown API requests
 app.use((req, res, next) => {
