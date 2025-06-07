@@ -60,10 +60,10 @@ app.use(
 );
 
 // Parse JSON request body
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: '100mb' }));
 
 // Parse URL-encoded request body
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
 // Enable cookie parser
 app.use(cookieParser());
