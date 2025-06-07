@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import express from 'express';
 import {
   createBlogHandler,
   getBlogsHandler,
@@ -18,9 +18,9 @@ import {
   saveDraftSchema,
 } from '../../validations/blog.validation';
 import auth from '../../middlewares/auth';
-import upload from '../../middlewares/upload';
+import blogUpload from '../../middlewares/blogUpload';
 
-const router = Router();
+const router = express.Router();
 
 /**
  * @swagger
@@ -224,9 +224,8 @@ router
   .route('/')
   .post(
     auth('admin'),
-    upload.single('coverImage'),
+    blogUpload.single('coverImage'),
     (req, res, next) => {
-      // After file upload, move coverImage data from file to body for validation
       if (req.file) {
         req.body.coverImage = req.file.path || 'file-uploaded';
       }
@@ -282,9 +281,8 @@ router
  */
 router.route('/draft').post(
   auth('admin'),
-  upload.single('coverImage'),
+  blogUpload.single('coverImage'),
   (req, res, next) => {
-    // After file upload, move coverImage data from file to body for validation
     if (req.file) {
       req.body.coverImage = req.file.path || 'file-uploaded';
     }
@@ -423,9 +421,8 @@ router
   .put(
     auth('admin'),
     validate(blogIdSchema, 'params'),
-    upload.single('coverImage'),
+    blogUpload.single('coverImage'),
     (req, res, next) => {
-      // After file upload, move coverImage data from file to body for validation
       if (req.file) {
         req.body.coverImage = req.file.path || 'file-uploaded';
       }

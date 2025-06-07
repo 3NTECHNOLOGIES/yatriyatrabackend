@@ -60,16 +60,40 @@ app.use(
 );
 
 // Parse JSON request body
-app.use(express.json({ limit: '100mb' }));
+app.use(
+  express.json({
+    limit: '50mb',
+    verify: (req, res, buf) => {
+      req.rawBody = buf;
+    },
+  }),
+);
 
 // Parse URL-encoded request body
-app.use(express.urlencoded({ extended: true, limit: '100mb' }));
+app.use(
+  express.urlencoded({
+    extended: true,
+    limit: '50mb',
+    parameterLimit: 100000,
+  }),
+);
 
 // Enable cookie parser
 app.use(cookieParser());
 
-// Enable gzip compression
-app.use(compression());
+// Enable gzip compression with higher levels for text
+app.use(
+  compression({
+    level: 6,
+    threshold: 10 * 1000, // 10KB
+    filter: (req, res) => {
+      if (req.headers['content-type']?.includes('multipart/form-data')) {
+        return false;
+      }
+      return compression.filter(req, res);
+    },
+  }),
+);
 
 // Add request logging in development mode
 if (config.env === 'development') {
