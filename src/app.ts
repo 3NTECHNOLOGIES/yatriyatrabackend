@@ -22,22 +22,19 @@ const app = express();
 // Set up CORS
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
-
-      if (
-        config.env === 'development' ||
-        (Array.isArray(config.cors.origin) && config.cors.origin.indexOf(origin) !== -1)
-      ) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: ['https://yatriyatra.com', 'http://localhost:5173', 'http://localhost:8080'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'Origin',
+      'X-Requested-With',
+      'Range',
+    ],
+    exposedHeaders: ['Content-Range', 'X-Content-Range', 'Content-Length', 'Content-Disposition'],
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    maxAge: 86400, // 24 hours
   }),
 );
 
@@ -50,8 +47,20 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        imgSrc: ["'self'", 'data:', 'blob:', 'http://localhost:5173', 'http://localhost:8080'],
-        connectSrc: ["'self'", 'http://localhost:5173', 'http://localhost:8080'],
+        imgSrc: [
+          "'self'",
+          'data:',
+          'blob:',
+          'https://yatriyatra.com',
+          'http://localhost:5173',
+          'http://localhost:8080',
+        ],
+        connectSrc: [
+          "'self'",
+          'https://yatriyatra.com',
+          'http://localhost:5173',
+          'http://localhost:8080',
+        ],
         scriptSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
       },

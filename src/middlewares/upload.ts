@@ -13,6 +13,11 @@ const fileFilter = (
 ) => {
   // Accept only image files
   if (file.mimetype.startsWith('image/')) {
+    // Check file size (10MB max)
+    if (file.size > 10 * 1024 * 1024) {
+      cb(new ApiError(httpStatus.BAD_REQUEST, 'File size too large. Maximum size is 10MB'));
+      return;
+    }
     cb(null, true);
   } else {
     cb(new ApiError(httpStatus.BAD_REQUEST, 'Only image files are allowed'));
@@ -24,7 +29,8 @@ const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 100 * 1024 * 1024, // 100MB max file size
+    fileSize: 10 * 1024 * 1024, // 10MB max file size
+    files: 1, // Maximum number of files
   },
 });
 

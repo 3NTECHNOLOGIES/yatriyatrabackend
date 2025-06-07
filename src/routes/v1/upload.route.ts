@@ -102,6 +102,29 @@ const router = express.Router();
  *                   type: string
  *                   example: Internal server error
  */
-router.post('/upload-image', auth(), upload.single('image'), uploadImage);
+router.post(
+  '/image',
+  auth(),
+  (req, res, next) => {
+    upload.single('image')(req, res, err => {
+      if (err instanceof Error) {
+        if (err.name === 'MulterError' && err.message === 'File too large') {
+          return res.status(413).json({
+            success: false,
+            message: 'File too large',
+            error: 'Maximum file size is 10MB',
+          });
+        }
+        return res.status(400).json({
+          success: false,
+          message: 'Upload failed',
+          error: err.message,
+        });
+      }
+      next();
+    });
+  },
+  uploadImage,
+);
 
 export default router;
