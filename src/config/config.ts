@@ -34,11 +34,17 @@ if (error) {
   throw new Error(`Config validation error: ${error.message}`);
 }
 
+let base_url =
+  process.env.NODE_ENV === 'development'
+    ? `http://${envVars.HOST}:${envVars.PORT}/api/v1`
+    : 'https://api.yatriyatra.com/api/v1';
+
 export default {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
   host: envVars.HOST,
-  baseUrl: envVars.API_BASE_URL || `http://${envVars.HOST}:${envVars.PORT}/api/v1`,
+  // baseUrl: envVars.API_BASE_URL || `http://${envVars.HOST}:${envVars.PORT}/api/v1`,
+  baseUrl: base_url,
   mongoose: {
     url: envVars.MONGODB_URI + (envVars.NODE_ENV === 'test' ? '-test' : ''),
     options: {

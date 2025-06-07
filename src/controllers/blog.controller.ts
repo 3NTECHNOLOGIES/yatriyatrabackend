@@ -38,17 +38,6 @@ export const createBlogHandler = async (req: AuthRequestWithFile, res: Response)
       return;
     }
 
-    // Log request body and file for debugging
-    logger.info('Blog creation request body:', JSON.stringify(req.body));
-    logger.info('Blog creation request file details:', {
-      exists: !!req.file,
-      fieldname: req.file?.fieldname,
-      originalname: req.file?.originalname,
-      mimetype: req.file?.mimetype,
-      size: req.file?.size,
-      buffer: req.file?.buffer ? 'Buffer exists' : 'No buffer',
-    });
-
     const blogData = {
       ...req.body,
       author: new mongoose.Types.ObjectId(req.user.id),
@@ -65,13 +54,6 @@ export const createBlogHandler = async (req: AuthRequestWithFile, res: Response)
           size: req.file.size,
           buffer: req.file.buffer,
         };
-
-        logger.info('Attempting to upload file to S3:', {
-          folderName: 'blog-covers',
-          originalname: fileToUpload.originalname,
-          mimetype: fileToUpload.mimetype,
-          size: fileToUpload.size,
-        });
 
         // Upload to S3 with 'blog-covers' folder
         const uploadResult = await uploadToS3(fileToUpload, { folderName: 'blog-covers' });
