@@ -40,7 +40,14 @@ export const createBlogHandler = async (req: AuthRequestWithFile, res: Response)
 
     // Log request body and file for debugging
     logger.info('Blog creation request body:', JSON.stringify(req.body));
-    logger.info('Blog creation request file:', req.file ? 'File present' : 'No file');
+    logger.info('Blog creation request file details:', {
+      exists: !!req.file,
+      fieldname: req.file?.fieldname,
+      originalname: req.file?.originalname,
+      mimetype: req.file?.mimetype,
+      size: req.file?.size,
+      buffer: req.file?.buffer ? 'Buffer exists' : 'No buffer',
+    });
 
     const blogData = {
       ...req.body,
@@ -59,11 +66,22 @@ export const createBlogHandler = async (req: AuthRequestWithFile, res: Response)
           buffer: req.file.buffer,
         };
 
+        logger.info('Attempting to upload file to S3:', {
+          folderName: 'blog-covers',
+          originalname: fileToUpload.originalname,
+          mimetype: fileToUpload.mimetype,
+          size: fileToUpload.size,
+        });
+
         // Upload to S3 with 'blog-covers' folder
         const uploadResult = await uploadToS3(fileToUpload, { folderName: 'blog-covers' });
+        logger.info('S3 upload successful:', uploadResult);
         blogData.coverImage = uploadResult.fileUrl;
       } catch (uploadError) {
-        logger.error('Cover image upload error:', uploadError);
+        logger.error('Cover image upload error:', {
+          error: uploadError instanceof Error ? uploadError.message : uploadError,
+          stack: uploadError instanceof Error ? uploadError.stack : undefined,
+        });
         sendResponse(res, httpStatus.BAD_REQUEST, 'Failed to upload cover image');
         return;
       }
