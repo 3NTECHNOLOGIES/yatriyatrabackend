@@ -19,8 +19,12 @@ import {
 } from '../../validations/blog.validation';
 import auth from '../../middlewares/auth';
 import blogUpload from '../../middlewares/blogUpload';
+import { blogLimiter } from '../../middlewares/rateLimiter';
 
 const router = express.Router();
+
+// Apply rate limiter to all blog routes
+router.use(blogLimiter);
 
 /**
  * @swagger
