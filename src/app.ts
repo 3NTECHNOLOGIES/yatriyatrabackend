@@ -19,22 +19,13 @@ import docsRoute from './routes/docs.route';
 // Create Express app
 const app = express();
 
+// Enable trust proxy - only trust first proxy
+app.set('trust proxy', 1);
+
 // Set up CORS
 app.use(
   cors({
-    origin: ['https://yatriyatra.com', 'http://localhost:5173', 'http://localhost:8080'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: [
-      'Content-Type',
-      'Authorization',
-      'Accept',
-      'Origin',
-      'X-Requested-With',
-      'Range',
-    ],
-    exposedHeaders: ['Content-Range', 'X-Content-Range', 'Content-Length', 'Content-Disposition'],
-    credentials: true,
-    maxAge: 86400, // 24 hours
+    origin: '*',
   }),
 );
 
@@ -118,6 +109,17 @@ const limiter = rateLimit({
   max: 100, // limit each IP to 100 requests per windowMs
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: request => {
+    if (!request.ip) {
+      console.error('Warning: request.ip is missing!');
+      return request.socket.remoteAddress || '127.0.0.1';
+    }
+    // Strip any port numbers from the IP
+    return request.ip.replace(/:\d+[^:]*$/, '');
+  },
+  validate: {
+    trustProxy: false, // Disable trust proxy validation since we handle it ourselves
+  },
 });
 app.use('/api', limiter);
 
